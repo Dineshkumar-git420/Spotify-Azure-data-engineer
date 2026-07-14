@@ -31,7 +31,7 @@
 					"source": {
 						"type": "AzureSqlSource",
 						"sqlReaderQuery": {
-							"value": "SELECT * FROM @{pipeline().parameters.schema}.@{pipeline().parameters.table} WHERE @{pipeline().parameters.cdc}>'@{activity('lookup_json').output.value[0].cdc}'",
+							"value": "SELECT * FROM @{pipeline().parameters.schema}.@{pipeline().parameters.table} WHERE @{pipeline().parameters.cdc_col}>'@{if( empty(pipeline().parameters.from_date),activity('lookup_json').output.value[0].cdc,pipeline().parameters.from_date)}'",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -68,7 +68,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"container": "raw-data",
-							"folder": "User",
+							"folder": {
+								"value": "@{pipeline().parameters.table}_cdc",
+								"type": "Expression"
+							},
 							"file": {
 								"value": "@concat(pipeline().parameters.table,'_',variables('current'))",
 								"type": "Expression"
@@ -106,7 +109,10 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"container": "raw-data",
-							"folder": "cdc",
+							"folder": {
+								"value": "@{pipeline().parameters.table}_cdc",
+								"type": "Expression"
+							},
 							"file": "cdc.json"
 						}
 					},
@@ -251,7 +257,10 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"container": "raw-data",
-										"folder": "cdc",
+										"folder": {
+											"value": "@{pipeline().parameters.table}_cdc",
+											"type": "Expression"
+										},
 										"file": "cdc.json"
 									}
 								}
@@ -278,7 +287,7 @@
 									{
 										"type": "Query",
 										"text": {
-											"value": "SELECT MAX(@{pipeline().parameters.cdc})as cdc FROM.@{pipeline().parameters.schema}.@{pipeline().parameters.table}",
+											"value": "SELECT MAX(@{pipeline().parameters.cdc_col})as cdc FROM.@{pipeline().parameters.schema}.@{pipeline().parameters.table}",
 											"type": "Expression"
 										}
 									}
@@ -292,12 +301,15 @@
 		],
 		"parameters": {
 			"schema": {
-				"type": "String"
+				"type": "string"
 			},
 			"table": {
 				"type": "string"
 			},
-			"cdc": {
+			"cdc_col": {
+				"type": "string"
+			},
+			"from_date": {
 				"type": "string"
 			}
 		},
