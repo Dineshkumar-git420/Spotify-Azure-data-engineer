@@ -81,11 +81,11 @@
 									"parameters": {
 										"container": "raw-data",
 										"folder": {
-											"value": "@{item()}.input_lookup",
+											"value": "@item().table",
 											"type": "Expression"
 										},
 										"file": {
-											"value": "@concat(item().input_lookup,'_',variables('current'))",
+											"value": "@concat(item().table,'_',variables('current'))",
 											"type": "Expression"
 										}
 									}
@@ -258,7 +258,10 @@
 												"type": "DatasetReference",
 												"parameters": {
 													"container": "raw-data",
-													"folder": "cdc",
+													"folder": {
+														"value": "@{item().table}_cdc",
+														"type": "Expression"
+													},
 													"file": "empty.json"
 												}
 											}
@@ -299,7 +302,7 @@
 												{
 													"type": "Query",
 													"text": {
-														"value": "SELECT MAX(@{item().cdc})as cdc FROM.@{item().schema}.@{item().table}",
+														"value": "SELECT MAX(@{item().cdc_col})as cdc FROM.@{item().schema}.@{item().table}",
 														"type": "Expression"
 													}
 												}
